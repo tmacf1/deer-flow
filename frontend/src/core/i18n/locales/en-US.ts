@@ -202,6 +202,8 @@ export const enUS: Translations = {
     nameStepAlreadyExistsError: "An agent with this name already exists",
     nameStepNetworkError:
       "Network request failed — check your network or backend connection",
+    nameStepApiDisabledError:
+      "This instance has custom-agent management disabled. Enable agents_api.enabled in config.yaml.",
     nameStepCheckError: "Could not verify name availability — please try again",
     nameStepBootstrapMessage:
       "The new custom agent name is {name}. Let's bootstrap it's **SOUL**.",

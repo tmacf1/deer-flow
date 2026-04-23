@@ -8,6 +8,7 @@ import yaml
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from deerflow.config.app_config import get_app_config
 from deerflow.config.agents_api_config import get_agents_api_config
 from deerflow.config.agents_config import AgentConfig, list_custom_agents, load_agent_config, load_agent_soul
 from deerflow.config.paths import get_paths
@@ -76,6 +77,9 @@ def _normalize_agent_name(name: str) -> str:
 
 def _require_agents_api_enabled() -> None:
     """Reject access unless the custom-agent management API is explicitly enabled."""
+    # Refresh config-backed singletons before checking the feature flag so
+    # config.yaml edits take effect without requiring a manual gateway restart.
+    get_app_config()
     if not get_agents_api_config().enabled:
         raise HTTPException(
             status_code=403,

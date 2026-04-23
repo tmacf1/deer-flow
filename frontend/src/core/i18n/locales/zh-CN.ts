@@ -190,6 +190,8 @@ export const zhCN: Translations = {
     nameStepInvalidError: "名称无效，只允许字母、数字和连字符",
     nameStepAlreadyExistsError: "已存在同名智能体",
     nameStepNetworkError: "网络请求失败，请检查网络或后端连接",
+    nameStepApiDisabledError:
+      "当前实例已禁用智能体管理 API，请在 config.yaml 中开启 agents_api.enabled",
     nameStepCheckError: "无法验证名称可用性，请稍后重试",
     nameStepBootstrapMessage:
       "新智能体的名称是 {name}，现在开始为它生成 **SOUL**。",

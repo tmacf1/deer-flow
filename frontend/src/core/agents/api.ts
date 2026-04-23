@@ -7,7 +7,10 @@ const BACKEND_UNAVAILABLE_STATUSES = new Set([502, 503, 504]);
 export class AgentNameCheckError extends Error {
   constructor(
     message: string,
-    public readonly reason: "backend_unreachable" | "request_failed",
+    public readonly reason:
+      | "backend_unreachable"
+      | "api_disabled"
+      | "request_failed",
   ) {
     super(message);
     this.name = "AgentNameCheckError";
@@ -84,6 +87,16 @@ export async function checkAgentName(
       throw new AgentNameCheckError(
         "Could not reach the DeerFlow backend.",
         "backend_unreachable",
+      );
+    }
+    if (
+      res.status === 403 &&
+      (err.detail?.includes("Custom-agent management API is disabled") ||
+        err.detail?.includes("agents_api.enabled=true"))
+    ) {
+      throw new AgentNameCheckError(
+        err.detail,
+        "api_disabled",
       );
     }
     throw new AgentNameCheckError(

@@ -159,6 +159,11 @@ export default function NewAgentPage() {
         err.reason === "backend_unreachable"
       ) {
         setNameError(t.agents.nameStepNetworkError);
+      } else if (
+        err instanceof AgentNameCheckError &&
+        err.reason === "api_disabled"
+      ) {
+        setNameError(t.agents.nameStepApiDisabledError);
       } else {
         setNameError(t.agents.nameStepCheckError);
       }
@@ -197,6 +202,7 @@ export default function NewAgentPage() {
     nameInput,
     sendMessage,
     t.agents.nameStepAlreadyExistsError,
+    t.agents.nameStepApiDisabledError,
     t.agents.nameStepNetworkError,
     t.agents.nameStepBootstrapMessage,
     t.agents.nameStepCheckError,
