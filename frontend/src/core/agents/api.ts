@@ -8,10 +8,16 @@ const BACKEND_UNAVAILABLE_STATUSES = new Set([502, 503, 504]);
 export class AgentNameCheckError extends Error {
   constructor(
     message: string,
-    public readonly reason:
-      | "backend_unreachable"
-      | "api_disabled"
-      | "request_failed",
+    public readonly reason: "backend_unreachable" | "request_failed",
+    /**
+     * Raw backend `detail` string when the failure came from a backend
+     * response carrying one. `null` when no detail was provided (e.g.
+     * network-layer failure, empty response body, unparseable body) — in
+     * which case `message` is a generated fallback like "Failed to check
+     * agent name: Bad Gateway" and the UI should prefer its own localized
+     * fallback instead of surfacing the generated string.
+     */
+    public readonly detail: string | null = null,
   ) {
     super(message);
     this.name = "AgentNameCheckError";
@@ -26,7 +32,11 @@ export class AgentsApiDisabledError extends Error {
 }
 
 function isAgentsApiDisabledDetail(detail: string | undefined): boolean {
-  return typeof detail === "string" && detail.includes("agents_api.enabled");
+  return (
+    typeof detail === "string" &&
+    (detail.includes("agents_api.enabled") ||
+      detail.includes("Custom-agent management API is disabled"))
+  );
 }
 
 export async function listAgents(): Promise<Agent[]> {
@@ -107,19 +117,11 @@ export async function checkAgentName(
         "backend_unreachable",
       );
     }
-    if (
-      res.status === 403 &&
-      (err.detail?.includes("Custom-agent management API is disabled") ||
-        err.detail?.includes("agents_api.enabled=true"))
-    ) {
-      throw new AgentNameCheckError(
-        err.detail,
-        "api_disabled",
-      );
-    }
+    const backendDetail = typeof err.detail === "string" ? err.detail : null;
     throw new AgentNameCheckError(
-      err.detail ?? `Failed to check agent name: ${res.statusText}`,
+      backendDetail ?? `Failed to check agent name: ${res.statusText}`,
       "request_failed",
+      backendDetail,
     );
   }
   return res.json() as Promise<{ available: boolean; name: string }>;
